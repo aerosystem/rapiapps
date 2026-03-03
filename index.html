@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapid aps - App install </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body { 
+            background: #0a0a0f;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            padding: 16px;
+            color: #ffffff;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Main container with glass effect */
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(10, 10, 15, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 40px;
+            padding: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 1;
+            animation: containerAppear 1s ease-out;
+        }
+
+        @keyframes containerAppear {
+            0% { opacity: 0; transform: scale(0.95) translateY(20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* Modern glass card */
+        .glass-card {
+            background: rgba(20, 20, 30, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 28px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+            animation: cardAppear 0.6s ease-out backwards;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #3b82f6, #a855f7, #ec4899, transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .glass-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 20px 40px -15px rgba(59, 130, 246, 0.3);
+        }
+
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Animated gradient text */
+        .gradient-text {
+            background: linear-gradient(
+                135deg,
+                #60a5fa 0%,
+                #c084fc 25%,
+                #f472b6 50%,
+                #c084fc 75%,
+                #60a5fa 100%
+            );
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientFlow 4s linear infinite;
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        /* Value display with glow - NO BLINKING */
+        .value-glow {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Only animate when new transaction arrives */
+        @keyframes valueUpdate {
+            0% { text-shadow: 0 0 20px rgba(16, 185, 129, 0.3); transform: scale(1); }
+            50% { text-shadow: 0 0 40px rgba(16, 185, 129, 0.8); transform: scale(1.05); color: #10b981; }
+            100% { text-shadow: 0 0 20px rgba(59, 130, 246, 0.3); transform: scale(1); color: #ffffff; }
+        }
+
+        .value-updated {
+            animation: valueUpdate 0.8s ease;
+        }
+
+        /* Modern progress bar */
+        .progress-modern {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 100px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #a855f7, #ec4899);
+            border-radius: 100px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        /* Floating animation */
+        .float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Pulse animation */
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Center popup with modern design */
+        #notificationOverlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s;
+            backdrop-filter: blur(8px);
+        }
+
+        #notificationOverlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #centerPopup {
+            background: rgba(20, 20, 30, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 40px;
+            padding: 40px 60px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            transform: scale(0.7) translateY(50px);
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #centerPopup::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                from 0deg,
+                transparent 0deg,
+                #3b82f6 60deg,
+                #a855f7 120deg,
+                #ec4899 180deg,
+                transparent 240deg
+            );
+            animation: rotate 4s linear infinite;
+            opacity: 0.2;
+        }
+
+        #centerPopup::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            background: rgba(20, 20, 30, 0.95);
+            border-radius: 38px;
+        }
+
+        .popup-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #notificationOverlay.show #centerPopup {
+            transform: scale(1) translateY(0);
+        }
+
+        .popup-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(145deg, #10b981, #059669);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            animation: bounceIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 20px 30px -10px rgba(16, 185, 129, 0.4);
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        /* Sign in overlay */
+        #signInOverlay {
+            position: fixed;
+            inset: 0;
+            background: #0a0a0f;
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+
+        .signin-card {
+            background: rgba(20, 20, 30, 0.7);
+            backdrop-filter: blur(20px);
+            border-radius: 40px;
+            padding: 60px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+            animation: cardFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes cardFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Table styles */
+        .table-modern {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table-modern th {
+            text-align: left;
+            padding: 20px 24px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.4);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .table-modern td {
+            padding: 18px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .table-modern tr {
+            transition: all 0.3s;
+            animation: rowAppear 0.5s ease-out backwards;
+        }
+
+        .table-modern tr:hover {
+            background: rgba(59, 130, 246, 0.1);
+            transform: scale(1.01);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes rowAppear {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* New row animation */
+        @keyframes newRowGlow {
+            0% { background: rgba(16, 185, 129, 0.3); }
+            100% { background: transparent; }
+        }
+
+        .row-new {
+            animation: newRowGlow 1.5s ease;
+        }
+
+        /* Badge styles */
+        .badge-modern {
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            transition: all 0.3s;
+        }
+
+        /* Loading animation */
+        .loading-dots {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .loading-dots span {
+            width: 8px;
+            height: 8px;
+            background: #3b82f6;
+            border-radius: 50%;
+            animation: dotBounce 0.8s ease-in-out infinite;
+        }
+
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes dotBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Shimmer effect */
+        .shimmer {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shimmer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: translateX(-100%);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            100% { transform: translateX(100%); }
+        }
+
+        /* Live indicator */
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+            animation: livePulse 1.5s ease infinite;
+        }
+
+        @keyframes livePulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(1.2); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sign In Overlay -->
+    <div id="signInOverlay">
+        <div class="signin-card">
+            <h1 class="text-6xl font-black gradient-text mb-4 float">CPAGRIP <span class="text-white">APP INSTALL</span></h1>
+            <p class="text-white/40 mb-10">Rapid App Account</p>
+            <button onclick="initializeSystem()" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-12 py-4 rounded-2xl font-semibold text-lg transition-all shadow-2xl pulse">
+                Visit Prefomence Now
+            </button>
+            <div class="loading-dots mt-8">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Center Popup -->
+    <div id="notificationOverlay">
+        <div id="centerPopup">
+            <div class="popup-content">
+                <div class="popup-icon">
+                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <p class="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-2 shimmer">New Transaction</p>
+                <p id="popupAmount" class="text-4xl font-black gradient-text mb-3">+$0.00</p>
+                <p class="text-white/40">Balance added successfully</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="mainDashboard" class="dashboard-container" style="display: none;">
+        <!-- Header -->
+        <div class="glass-card mb-8" style="animation-delay: 0.1s;">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                <div class="flex items-center gap-5">
+                    <div class="w-14 h-14 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center text-white font-black text-2xl float">
+                        R
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold gradient-text">CPA Grip-rapid apps</h2>
+                        <div class="flex items-center gap-2">
+                            <span class="live-dot"></span>
+                            <p class="text-white/40 text-sm">Real-Time Transaction Monitor</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 md:mt-0 flex items-center gap-6">
+                    <div class="text-right">
+                        <p class="text-xs text-white/40 font-semibold">SYSTEM TIME</p>
+                        <p id="liveClock" class="text-xl font-bold gradient-text">00:00:00</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold pulse">
+                        RP
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div class="glass-card" style="animation-delay: 0.2s;">
+                <p class="text-white/40 text-xs font-semibold mb-2">TOTAL EARNINGS</p>
+                <p id="totalNet" class="value-glow">$0.00</p>
+                <div class="flex items-center gap-2 mt-4">
+                    <span class="badge-modern">+12.5%</span>
+                    <span class="text-xs text-white/20">vs last month</span>
+                </div>
+            </div>
+
+            <div class="glass-card" style="animation-delay: 0.25s;">
+                <p class="text-white/40 text-xs font-semibold mb-2">TODAY'S REVENUE</p>
+                <p id="dailyRev" class="value-glow">$0.00</p>
+                <div class="flex items-center gap-2 mt-4">
+                    <span class="badge-modern">+8.2%</span>
+                    <span class="text-xs text-white/20">vs yesterday</span>
+                </div>
+            </div>
+
+            <div class="glass-card" style="animation-delay: 0.3s;">
+                <p class="text-white/40 text-xs font-semibold mb-2">CONVERSIONS</p>
+                <p id="totalLeads" class="value-glow">0</p>
+                <div class="flex items-center gap-2 mt-4">
+                    <span class="badge-modern">+8.2%</span>
+                    <span class="text-xs text-white/20">conversion rate</span>
+                </div>
+            </div>
+
+            <div class="glass-card" style="animation-delay: 0.35s;">
+                <p class="text-white/40 text-xs font-semibold mb-2">AVG PAYOUT</p>
+                <p id="avgPay" class="value-glow">$0.00</p>
+                <div class="flex items-center gap-2 mt-4">
+                    <span class="badge-modern">+$0.32</span>
+                    <span class="text-xs text-white/20">vs yesterday</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Revenue with Progress -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div class="glass-card lg:col-span-2" style="animation-delay: 0.4s;">
+                <div class="flex justify-between items-center mb-3">
+                    <p class="text-white/40 text-xs font-semibold">DAILY GOAL ($100)</p>
+                    <p id="percentNum" class="text-sm font-semibold text-blue-400">0% completed</p>
+                </div>
+                <div class="progress-modern">
+                    <div id="goalBar" class="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="glass-card" style="animation-delay: 0.45s;">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-white/40 text-xs mb-1">Yesterday</p>
+                        <p id="yesterdayRev" class="text-xl font-bold text-white">$0.00</p>
+                    </div>
+                    <div>
+                        <p class="text-white/40 text-xs mb-1">Top GEO</p>
+                        <p id="topCountry" class="text-xl font-bold text-white">US</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historical Stats -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="glass-card p-6" style="animation-delay: 0.5s;">
+                <p class="text-white/40 text-xs mb-1">Before Yest</p>
+                <p id="dbYesterdayRev" class="text-xl font-bold text-white">$0.00</p>
+                <span class="text-xs text-red-400">↓ -2.1%</span>
+            </div>
+            <div class="glass-card p-6" style="animation-delay: 0.55s;">
+                <p class="text-white/40 text-xs mb-1">Last 7 Days</p>
+                <p id="weekRev" class="text-xl font-bold text-white">$0.00</p>
+                <span class="text-xs text-green-400">↑ +12.8%</span>
+            </div>
+            <div class="glass-card p-6" style="animation-delay: 0.6s;">
+                <p class="text-white/40 text-xs mb-1">This Month</p>
+                <p id="monthRev" class="text-xl font-bold text-white">$0.00</p>
+                <span class="text-xs text-green-400">↑ +24.3%</span>
+            </div>
+            <div class="glass-card p-6" style="animation-delay: 0.65s;">
+                <p class="text-white/40 text-xs mb-1">Network Health</p>
+                <p class="text-xl font-bold text-white">98.5%</p>
+                <span class="text-xs text-green-400">operational</span>
+            </div>
+        </div>
+
+        <!-- Live Transactions -->
+        <div class="glass-card" style="animation-delay: 0.7s;">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold gradient-text">Live Transactions</h3>
+                <div class="flex gap-2">
+                    <span class="badge-modern">LIVE</span>
+                    <span class="badge-modern">24/7</span>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="table-modern">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Agent ID</th>
+                            <th>Offer</th>
+                            <th class="text-right">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leadsTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwWBbwoWoJZmPqG3beLWKTO9ZcUunye2hvvyGpDJJoIBbM-1zJWJQqfgxh_DGR_6dxRQw/exec';
+        const DAILY_GOAL = 100;
+        
+        // State management
+        let previousLeads = [];
+        let currentLeads = [];
+        let isSoundEnabled = false;
+        let notificationTimeout;
+        let isFirstLoad = true;
+
+        // Clock update
+        function updateClock() {
+            const clock = document.getElementById('liveClock');
+            if(clock) clock.innerText = new Date().toLocaleTimeString('en-US', { hour12: false });
+        }
+        setInterval(updateClock, 1000);
+
+        // Initialize system
+        function initializeSystem() {
+            document.getElementById('signInOverlay').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('signInOverlay').style.display = 'none';
+                document.getElementById('mainDashboard').style.display = 'block';
+            }, 500);
+            
+            isSoundEnabled = true;
+            
+            // Test sound
+            const testSound = new Audio('sound.mp3');
+            testSound.play().catch(() => {});
+            
+            // First data load
+            fetchNewTransactions();
+            
+            // Check for new transactions every 10 seconds (NO BLINKING)
+            setInterval(fetchNewTransactions, 10000);
+        }
+
+        // Show notification
+        function showNotification(amount) {
+            if(!isSoundEnabled) return;
+            
+            const overlay = document.getElementById('notificationOverlay');
+            document.getElementById('popupAmount').innerText = `+$${amount.toFixed(2)}`;
+            
+            if(notificationTimeout) clearTimeout(notificationTimeout);
+            
+            overlay.classList.add('show');
+            
+            const sound = new Audio('sound.mp3');
+            sound.play().catch(() => {});
+            
+            notificationTimeout = setTimeout(() => {
+                overlay.classList.remove('show');
+            }, 3000);
+        }
+
+        // Date handling
+        function getNexusDate(dateObj) {
+            const d = new Date(dateObj);
+            const hours = d.getHours();
+            if (hours < 13 || (hours === 13 && d.getMinutes() < 30)) {
+                d.setDate(d.getDate() - 1);
+            }
+            return d.toDateString();
+        }
+
+        // MAIN FUNCTION - Only updates when new transactions arrive
+        async function fetchNewTransactions() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                const newLeads = data.reverse();
+                
+                // First load - just display data without animation
+                if(isFirstLoad) {
+                    currentLeads = newLeads;
+                    previousLeads = newLeads;
+                    fullUpdate(newLeads);
+                    isFirstLoad = false;
+                    return;
+                }
+                
+                // Check for new transactions by comparing IDs
+                const oldIds = new Set(previousLeads.map(lead => lead.ID));
+                const brandNewLeads = newLeads.filter(lead => !oldIds.has(lead.ID));
+                
+                // ONLY update if there are new transactions
+                if(brandNewLeads.length > 0) {
+                    console.log(`Found ${brandNewLeads.length} new transactions`);
+                    
+                    // Update current leads
+                    currentLeads = newLeads;
+                    
+                    // Process each new transaction
+                    brandNewLeads.forEach(lead => {
+                        const amount = parseFloat(lead.Payout) || 0;
+                        
+                        // Show notification
+                        showNotification(amount);
+                        
+                        // Add new row to table (with animation)
+                        addNewRow(lead);
+                    });
+                    
+                    // Recalculate and update all values (with animation)
+                    updateAllValues(newLeads);
+                    
+                    // Update previous leads for next comparison
+                    previousLeads = newLeads;
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Full update for first load
+        function fullUpdate(leads) {
+            // Render table
+            renderTable(leads);
+            
+            // Calculate and display values
+            calculateAndDisplayValues(leads);
+        }
+
+        // Calculate all values and display (NO BLINKING)
+        function calculateAndDisplayValues(leads) {
+            let total = 0, daily = 0, yesterday = 0, dbYesterday = 0, week = 0, month = 0;
+            let countries = {};
+            
+            const now = new Date();
+            const nexusToday = getNexusDate(now);
+            
+            const yestObj = new Date();
+            yestObj.setDate(yestObj.getDate() - 1);
+            const nexusYesterday = getNexusDate(yestObj);
+            
+            const dbYestObj = new Date();
+            dbYestObj.setDate(dbYestObj.getDate() - 2);
+            const nexusDbYesterday = getNexusDate(dbYestObj);
+            
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            
+            leads.forEach(lead => {
+                const pay = parseFloat(lead.Payout) || 0;
+                const lDate = new Date(lead.Date);
+                const lNexusDate = getNexusDate(lDate);
+                
+                total += pay;
+                
+                if(lNexusDate === nexusToday) daily += pay;
+                if(lNexusDate === nexusYesterday) yesterday += pay;
+                if(lNexusDate === nexusDbYesterday) dbYesterday += pay;
+                if(lDate >= sevenDaysAgo) week += pay;
+                if(lDate.getMonth() === now.getMonth() && lDate.getFullYear() === now.getFullYear()) month += pay;
+                
+                if(lead.Country) {
+                    countries[lead.Country] = (countries[lead.Country] || 0) + 1;
+                }
+            });
+            
+            // Update DOM
+            document.getElementById('totalNet').innerText = '$' + total.toFixed(2);
+            document.getElementById('dailyRev').innerText = '$' + daily.toFixed(2);
+            document.getElementById('yesterdayRev').innerText = '$' + yesterday.toFixed(2);
+            document.getElementById('dbYesterdayRev').innerText = '$' + dbYesterday.toFixed(2);
+            document.getElementById('weekRev').innerText = '$' + week.toFixed(2);
+            document.getElementById('monthRev').innerText = '$' + month.toFixed(2);
+            document.getElementById('totalLeads').innerText = leads.length;
+            
+            const avg = leads.length > 0 ? total/leads.length : 0;
+            document.getElementById('avgPay').innerText = '$' + avg.toFixed(2);
+            
+            // Goal progress
+            const percent = (daily / DAILY_GOAL) * 100;
+            document.getElementById('goalBar').style.width = Math.min(percent, 100) + '%';
+            document.getElementById('percentNum').innerText = Math.round(percent) + '% completed';
+            
+            // Top country
+            let topC = 'US';
+            if(Object.keys(countries).length > 0) {
+                topC = Object.keys(countries).reduce((a, b) => countries[a] > countries[b] ? a : b);
+            }
+            document.getElementById('topCountry').innerText = topC;
+        }
+
+        // Update values with animation (only when new transaction arrives)
+        function updateAllValues(leads) {
+            let total = 0, daily = 0, yesterday = 0, dbYesterday = 0, week = 0, month = 0;
+            let countries = {};
+            
+            const now = new Date();
+            const nexusToday = getNexusDate(now);
+            
+            const yestObj = new Date();
+            yestObj.setDate(yestObj.getDate() - 1);
+            const nexusYesterday = getNexusDate(yestObj);
+            
+            const dbYestObj = new Date();
+            dbYestObj.setDate(dbYestObj.getDate() - 2);
+            const nexusDbYesterday = getNexusDate(dbYestObj);
+            
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            
+            leads.forEach(lead => {
+                const pay = parseFloat(lead.Payout) || 0;
+                const lDate = new Date(lead.Date);
+                const lNexusDate = getNexusDate(lDate);
+                
+                total += pay;
+                
+                if(lNexusDate === nexusToday) daily += pay;
+                if(lNexusDate === nexusYesterday) yesterday += pay;
+                if(lNexusDate === nexusDbYesterday) dbYesterday += pay;
+                if(lDate >= sevenDaysAgo) week += pay;
+                if(lDate.getMonth() === now.getMonth() && lDate.getFullYear() === now.getFullYear()) month += pay;
+                
+                if(lead.Country) {
+                    countries[lead.Country] = (countries[lead.Country] || 0) + 1;
+                }
+            });
+            
+            // Update with animation
+            animateValue('totalNet', total);
+            animateValue('dailyRev', daily);
+            animateValue('yesterdayRev', yesterday);
+            animateValue('dbYesterdayRev', dbYesterday);
+            animateValue('weekRev', week);
+            animateValue('monthRev', month);
+            animateValue('totalLeads', leads.length);
+            
+            const avg = leads.length > 0 ? total/leads.length : 0;
+            document.getElementById('avgPay').innerText = '$' + avg.toFixed(2);
+            
+            // Goal progress
+            const percent = (daily / DAILY_GOAL) * 100;
+            document.getElementById('goalBar').style.width = Math.min(percent, 100) + '%';
+            document.getElementById('percentNum').innerText = Math.round(percent) + '% completed';
+            
+            // Top country
+            let topC = 'US';
+            if(Object.keys(countries).length > 0) {
+                topC = Object.keys(countries).reduce((a, b) => countries[a] > countries[b] ? a : b);
+            }
+            document.getElementById('topCountry').innerText = topC;
+        }
+
+        // Animate value update
+        function animateValue(elementId, value) {
+            const element = document.getElementById(elementId);
+            
+            // Add animation class
+            element.classList.add('value-updated');
+            
+            // Update value
+            if(elementId === 'totalLeads') {
+                element.innerText = value;
+            } else {
+                element.innerText = '$' + value.toFixed(2);
+            }
+            
+            // Remove animation class after animation completes
+            setTimeout(() => {
+                element.classList.remove('value-updated');
+            }, 800);
+        }
+
+        // Add new row to table (with animation)
+        function addNewRow(lead) {
+            const tbody = document.getElementById('leadsTable');
+            const amount = parseFloat(lead.Payout) || 0;
+            const date = new Date(lead.Date);
+            
+            // Create new row
+            const newRow = document.createElement('tr');
+            newRow.className = 'row-new';
+            newRow.innerHTML = `
+                <td>${date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</td>
+                <td><span class="badge-modern">#${lead.ID}</span></td>
+                <td>${lead.Offer}</td>
+                <td class="text-right font-bold text-green-400">+$${amount.toFixed(2)}</td>
+            `;
+            
+            // Add to top of table
+            tbody.insertBefore(newRow, tbody.firstChild);
+            
+            // Keep only last 50 rows
+            if(tbody.children.length > 50) {
+                tbody.removeChild(tbody.lastChild);
+            }
+        }
+
+        // Render full table (first load)
+        function renderTable(leads) {
+            let html = '';
+            leads.slice(0, 50).forEach(lead => {
+                const amount = parseFloat(lead.Payout) || 0;
+                const date = new Date(lead.Date);
+                html += `<tr>
+                    <td>${date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</td>
+                    <td><span class="badge-modern">#${lead.ID}</span></td>
+                    <td>${lead.Offer}</td>
+                    <td class="text-right font-bold text-green-400">+$${amount.toFixed(2)}</td>
+                </tr>`;
+            });
+            document.getElementById('leadsTable').innerHTML = html;
+        }
+
+        // Initial clock
+        updateClock();
+    </script>
+</body>
+</html>
